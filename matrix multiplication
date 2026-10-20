@@ -1,0 +1,90 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+int main() {
+    int m, n;
+    // 1. Read dimensions of Matrix A
+    if (scanf("%d %d", &m, &n) != 2) return 0;
+
+    // Allocate memory for Matrix A
+    int **A = (int **)malloc(m * sizeof(int *));
+    for (int i = 0; i < m; i++) {
+        A[i] = (int *)malloc(n * sizeof(int));
+    }
+
+    // Read elements of Matrix A
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < n; j++) {
+            if (scanf("%d", &A[i][j]) != 1) return 0;
+        }
+    }
+
+    int r, p;
+    // 2. Read dimensions of Matrix B
+    if (scanf("%d %d", &r, &p) != 2) return 0;
+
+    // Check if matrix multiplication is possible
+    if (n != r) {
+        printf("Invalid input\n");
+        
+        // Clean up Matrix A memory before exiting
+        for (int i = 0; i < m; i++) {
+            free(A[i]);
+		}        free(A);        return 0;
+    }
+
+    // Allocate memory for Matrix B
+    int **B = (int **)malloc(r * sizeof(int *));
+    for (int i = 0; i < r; i++) {
+        B[i] = (int *)malloc(p * sizeof(int));
+    }
+
+    // Read elements of Matrix B
+    for (int i = 0; i < r; i++) {
+        for (int j = 0; j < p; j++) {
+            if (scanf("%d", &B[i][j]) != 1) return 0;
+        }
+    }
+
+    // Allocate memory for the Result Matrix (m x p)
+    int **C = (int **)malloc(m * sizeof(int *));
+    for (int i = 0; i < m; i++) {
+        C[i] = (int *)malloc(p * sizeof(int));
+    }
+
+    // Perform Matrix Multiplication
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < p; j++) {
+            C[i][j] = 0;
+            for (int k = 0; k < n; k++) {
+                C[i][j] += A[i][k] * B[k][j];
+            }
+        }
+    }
+    // Display the resulting product matrix (matches trailing spaces requirement)
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < p; j++) {
+            printf("%d ", C[i][j]);
+        }
+        printf("\n");
+    }
+
+    // Clean up all allocated memory
+    for (int i = 0; i < m; i++) {
+        free(A[i]);
+    }
+    free(A);
+
+    for (int i = 0; i < r; i++) {
+        free(B[i]);
+    }
+    free(B);
+
+    for (int i = 0; i < m; i++) {
+        free(C[i]);
+    }
+    free(C);
+
+    return 0;
+}
+
