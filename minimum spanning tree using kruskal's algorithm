@@ -1,0 +1,112 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <limits.h>
+struct Edge {
+    int u, v, weight;
+};
+
+int find(int parent[], int i) {
+    if (parent[i] == i)
+        return i;
+    return parent[i] = find(parent, parent[i]);
+}
+
+void unionSets(int parent[], int rank[], int x, int y) {
+    int rootX = find(parent, x);
+    int rootY = find(parent, y);
+    if (rootX != rootY) {
+        if (rank[rootX] < rank[rootY])
+            parent[rootX] = rootY;
+        else if (rank[rootX] > rank[rootY])
+            parent[rootY] = rootX;
+        else {
+            parent[rootY] = rootX;
+            rank[rootX]++;
+        }
+    }
+}
+
+// Fixed comparison function to handle ties systematically
+int compareEdges(const void *a, const void *b) {
+    struct Edge *e1 = (struct Edge *)a;
+    struct Edge *e2 = (struct Edge *)b;
+    
+    if (e1->weight != e2->weight) {
+        return e1->weight - e2->weight;
+    }
+    if (e1->u != e2->u) {
+        return e1->u - e2->u;
+    }
+    return e1->v - e2->v;
+}
+
+void kruskalMST(int **cost, int V) {
+    struct Edge *edges = (struct Edge *)malloc(V * V * sizeof(struct Edge));
+    int edgeCount = 0;
+
+    for (int i = 0; i < V; i++) {
+        for (int j = i + 1; j < V; j++) {
+            if (i != j && cost[i][j] != 0 && cost[i][j] != INT_MAX && cost[i][j] != 9999) {
+                edges[edgeCount].u = i;
+                edges[edgeCount].v = j;
+                edges[edgeCount].weight = cost[i][j];
+                edgeCount++;
+            }
+        }
+	}
+    qsort(edges, edgeCount, sizeof(struct Edge), compareEdges);
+
+    int *parent = (int *)malloc(V * sizeof(int));
+    int *rank = (int *)malloc(V * sizeof(int));
+    for (int i = 0; i < V; i++) {
+        parent[i] = i;
+        rank[i] = 0;
+    }
+
+    int mstCost = 0;
+    int count = 0;
+
+    for (int i = 0; i < edgeCount && count < V - 1; i++) {
+        int u = edges[i].u;
+        int v = edges[i].v;
+        int w = edges[i].weight;
+
+        int setU = find(parent, u);
+        int setV = find(parent, v);
+
+        if (setU != setV) {
+            printf("Edge %d:(%d, %d) cost:%d\n", count, u, v, w);
+            mstCost += w;
+            unionSets(parent, rank, setU, setV);
+            count++;
+        }
+    }
+
+    printf("Minimum cost= %d\n", mstCost);
+
+    free(edges);
+    free(parent);
+    free(rank);
+}
+int main() {
+    int V;
+    printf("No of vertices: ");
+    scanf("%d", &V);
+
+    int **cost = (int **)malloc(V * sizeof(int *));
+    for (int i = 0; i < V; i++)
+        cost[i] = (int *)malloc(V * sizeof(int));
+
+    printf("Adjacency matrix:\n");
+    for (int i = 0; i < V; i++)
+        for (int j = 0; j < V; j++)
+            scanf("%d", &cost[i][j]);
+
+    kruskalMST(cost, V);
+
+    for (int i = 0; i < V; i++)
+        free(cost[i]);
+    free(cost);
+
+    return 0;
+}
