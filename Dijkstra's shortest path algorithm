@@ -1,0 +1,116 @@
+#include <limits.h> 
+#include <stdio.h>
+#define MAX 20
+int V, E;
+int graph[MAX][MAX];
+#define INFINITY 99999
+
+void dijkstra(int G[MAX][MAX], int n, int startnode) {
+	
+    int distance[MAX], pred[MAX], visited[MAX];
+    int count, mindistance, nextnode, i, j;
+
+    // Initialize distance, predecessor, and visited arrays
+    for (i = 1; i <= n; i++) {
+        visited[i] = 0;
+        if (i == startnode) {
+            distance[i] = 0;
+            pred[i] = 0;
+        } else if (G[startnode][i] > 0) {
+            distance[i] = G[startnode][i];
+            pred[i] = startnode;
+        } else {
+            distance[i] = INFINITY;
+            pred[i] = 0;
+        }
+    }
+
+    visited[startnode] = 1;
+    count = 1;
+
+    // Main Dijkstra loop
+    while (count < n - 1) {
+        mindistance = INFINITY;
+        nextnode = 0;
+
+        // Find the unvisited node with the smallest distance
+        for (i = 1; i <= n; i++) {
+            if (distance[i] < mindistance && !visited[i]) {
+                mindistance = distance[i];
+                nextnode = i;
+            }
+		}        // If no reachable next node is found, break early
+        if (nextnode == 0) {
+            break;
+        }
+
+        visited[nextnode] = 1;
+
+        // Update distances of neighboring nodes
+        for (i = 1; i <= n; i++) {
+            if (!visited[i] && G[nextnode][i] > 0) {
+                if (mindistance + G[nextnode][i] < distance[i]) {
+                    distance[i] = mindistance + G[nextnode][i];
+                    pred[i] = nextnode;
+                }
+            }
+        }
+        count++;
+    }
+
+    // Print headers matching the test case format
+    printf("Node\tDistance\tPath\n");
+
+    // Output formatting
+    for (i = 1; i <= n; i++) {
+        if (i != startnode) {
+            if (distance[i] == INFINITY) {
+                // %4d matches the 3 spaces of padding (···) for single digits
+                printf("%4d\t%8s\t%s\n", i, "INF", "NO PATH");
+            } else {
+                // %4d matches the 3 spaces of padding (···) for single digits
+                printf("%4d\t%8d\t", i, distance[i]);                
+                // Backtrack to print path in V<-U<-...<-S structure
+                j = i;
+                printf("%d", j);
+                while (pred[j] != 0) {
+                    j = pred[j];
+                    printf("<-%d", j);
+                }
+                printf("\n");
+            }
+        }
+    }
+
+}
+int main() { 
+	int s, d, w, i, j;
+	printf("Enter the number of vertices : ");
+	scanf("%d", &V);
+	printf("Enter the number of edges : ");
+	scanf("%d", &E);
+	for(i = 1 ; i <= V; i++) {
+		for(j = 1; j <= V; j++) {
+			graph[i][i] = 0;
+		}
+	}
+	for(i = 1; i <= E; i++) {
+		printf("Enter source : ");
+		scanf("%d", &s);
+		printf("Enter destination : ");
+		scanf("%d", &d);
+		printf("Enter weight : ");
+		scanf("%d", &w);
+		if(s > V || d > V || s <= 0 || d <= 0) {
+			printf("Invalid index. Try again.\n");
+			i--;
+			continue;
+		} else {
+			graph[s][d] = w;
+		}
+	}
+	printf("Enter the source :");
+	scanf("%d", &s);
+	dijkstra(graph, V, s); 
+	return 0; 
+} 
